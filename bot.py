@@ -23,6 +23,8 @@ from handlers.premium_handlers import setup_premium_handlers
 from handlers.file_handlers import setup_file_handlers
 from handlers.payment_handlers import setup_payment_handlers
 from handlers.benefits_handlers import setup_benefits_handlers
+from handlers.clone_handlers import setup_clone_handlers
+from handlers.advanced_features import setup_advanced_handlers
 
 # Setup logging
 logging.basicConfig(
@@ -79,6 +81,8 @@ class PhoenixFilterBot:
         setup_file_handlers(self.client, self.db)
         setup_payment_handlers(self.client, self.db)
         setup_benefits_handlers(self.client, self.db)
+        setup_clone_handlers(self.client, self.db)
+        setup_advanced_handlers(self.client, self.db)
         
         logger.info("✅ Bot initialization complete")
     
