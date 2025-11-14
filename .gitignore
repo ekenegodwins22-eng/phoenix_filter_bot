@@ -105,3 +105,18 @@ temp/
 *.db
 *.sqlite
 *.sqlite3
+
+# Pyrogram session
+phoenix_filter_bot.session
+phoenix_filter_bot.session-journal
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv
