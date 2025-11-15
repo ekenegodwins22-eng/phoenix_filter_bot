@@ -202,9 +202,12 @@ def setup_search_handlers(client: Client, db: AsyncIOMotorDatabase):
     search_engine = SearchEngine(db)
     fsub_manager = FSubManager(db)
     
-    @client.on_message(filters.text & ~filters.command & filters.private)
+    @client.on_message(filters.text & filters.private)
     async def handle_pm_search(client: Client, message: Message):
         """Handle search queries in private messages"""
+        # Skip if it's a command
+        if message.text.startswith("/"):
+            return
         await handle_search_query(client, message, db, search_engine, fsub_manager)
     
     @client.on_message(filters.command("index"))
