@@ -51,12 +51,14 @@ class PhoenixFilterBot:
             logger.error("❌ Configuration validation failed!")
             raise ValueError("Invalid configuration")
         
-        # Initialize Pyrogram client
+        # Initialize Pyrogram client with time sync fix
         self.client = Client(
             "phoenix_filter_bot",
             api_id=API_ID,
             api_hash=API_HASH,
             bot_token=BOT_TOKEN,
+            sleep_threshold=0,  # Disable sleep to prevent time sync issues
+            no_updates=False,
         )
         
         # Initialize MongoDB connection
