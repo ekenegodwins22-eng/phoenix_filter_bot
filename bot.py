@@ -89,29 +89,47 @@ class PhoenixFilterBot:
         logger.info("✅ Bot initialization complete")
     
     async def start(self):
-        """Start the bot"""
-        try:
-            await self.client.start()
-            me = await self.client.get_me()
-            logger.info(f"✅ Bot started successfully!")
-            logger.info(f"   Bot: @{me.username}")
-            logger.info(f"   ID: {me.id}")
-            
-            # Send startup notification to owner
+        """Start the bot with retry logic"""
+        max_retries = 5
+        retry_delay = 5
+        
+        for attempt in range(1, max_retries + 1):
             try:
-                await self.client.send_message(
-                    OWNER_ID,
-                    "🔥 **Phoenix Filter Bot Started**\n\n"
-                    "The bot is now online and ready to use!"
-                )
+                logger.info(f"🔄 Connection attempt {attempt}/{max_retries}...")
+                await self.client.start()
+                me = await self.client.get_me()
+                logger.info(f"✅ Bot started successfully!")
+                logger.info(f"   Bot: @{me.username}")
+                logger.info(f"   ID: {me.id}")
+                
+                # Send startup notification to owner
+                try:
+                    await self.client.send_message(
+                        OWNER_ID,
+                        "🔥 **Phoenix Filter Bot Started**\n\n"
+                        "The bot is now online and ready to use!"
+                    )
+                except Exception as e:
+                    logger.warning(f"Could not send startup message to owner: {e}")
+                
+                # Keep the bot running
+                await asyncio.Event().wait()
+                return
             except Exception as e:
-                logger.warning(f"Could not send startup message to owner: {e}")
-            
-            # Keep the bot running
-            await asyncio.Event().wait()
-        except Exception as e:
-            logger.error(f"❌ Error starting bot: {e}")
-            raise
+                error_msg = str(e)
+                logger.error(f"❌ Connection attempt {attempt} failed: {error_msg}")
+                
+                # If it's a time sync error, wait longer before retry
+                if "msg_id is too low" in error_msg or "time" in error_msg.lower():
+                    wait_time = retry_delay * (2 ** (attempt - 1))  # Exponential backoff
+                    logger.info(f"⏳ Time sync issue detected. Waiting {wait_time}s before retry...")
+                    await asyncio.sleep(wait_time)
+                elif attempt < max_retries:
+                    logger.info(f"⏳ Retrying in {retry_delay}s...")
+                    await asyncio.sleep(retry_delay)
+                else:
+                    logger.error(f"❌ Failed to start bot after {max_retries} attempts")
+                    raise
     
     async def stop(self):
         """Stop the bot"""
